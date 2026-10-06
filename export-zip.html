@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VEROX MEDIA DOWNLOADER - 1-Click ZIP Exporter</title>
+  <style>
+    body {
+      background: #070709;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    .card {
+      background: rgba(18, 18, 24, 0.94);
+      border: 1.5px solid rgba(229, 9, 20, 0.4);
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 520px;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(229, 9, 20, 0.25);
+    }
+    .brand-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, #e50914, #99000a);
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      box-shadow: 0 0 20px rgba(229, 9, 20, 0.5);
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+    h1 span { color: #ff1e27; }
+    p {
+      color: #a3a3b2;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 28px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 32px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-radius: 12px;
+      color: #fff;
+      background: linear-gradient(135deg, #ff1e27, #e50914);
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(229, 9, 20, 0.5);
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(229, 9, 20, 0.7);
+    }
+    .status {
+      margin-top: 18px;
+      font-size: 0.9rem;
+      color: #00e676;
+      display: none;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+  <div class="card">
+    <div class="brand-icon">
+      <svg viewBox="0 0 24 24" width="30" height="30" fill="white">
+        <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
+      </svg>
+    </div>
+    <h1>VEROX <span>DOWNLOADER</span> ZIP</h1>
+    <p>Click below to download the clean, production-ready build as <strong>VEROX-MEDIA-DOWNLOADER.zip</strong> for direct drag-and-drop deployment on Netlify or Vercel.</p>
+    <button id="btnZip" class="btn" onclick="generateZip()">
+      ⚡ Download Project ZIP Now
+    </button>
+    <div id="status" class="status">Packaging files & starting download...</div>
+  </div>
+
+  <script>
+    async function generateZip() {
+      const btn = document.getElementById('btnZip');
+      const status = document.getElementById('status');
+      btn.disabled = true;
+      status.style.display = 'block';
+      status.textContent = 'Collecting production files...';
+
+      const zip = new JSZip();
+      const files = [
+        'index.html',
+        'style.css',
+        'app.js',
+        'manifest.json',
+        'vercel.json',
+        'netlify.toml',
+        '_headers',
+        '_redirects',
+        'api/download.js',
+        'api/extract.js',
+        'api/keyauth.js',
+        'README.md'
+      ];
+
+      for (const f of files) {
+        try {
+          const res = await fetch('./' + f);
+          if (res.ok) {
+            const content = await res.text();
+            zip.file(f, content);
+          }
+        } catch (e) {
+          console.warn('Failed to read file: ' + f, e);
+        }
+      }
+
+      status.textContent = 'Generating compressed ZIP archive...';
+      const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+      
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'VEROX-MEDIA-DOWNLOADER.zip';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      status.textContent = '✅ VEROX-MEDIA-DOWNLOADER.zip downloaded successfully!';
+      btn.disabled = false;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VEROX MEDIA DOWNLOADER - Universal Video & Audio Downloader</title>
+  <meta name="description" content="Ultra-fast universal social media video & audio downloader. Download 4K, 1080p, and 320kbps MP3 from YouTube, TikTok, Facebook, Instagram, Twitter/X, and Reddit with zero CORS errors.">
+  <meta name="theme-color" content="#e50914">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="VEROX MEDIA DOWNLOADER">
+  <meta property="og:description" content="Universal social media downloader with KeyAuth Premium & Free Tier guest mode.">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&auto=format&fit=crop&q=80">
+
+  <!-- PWA Manifest & App Icon -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23e50914'/%3E%3Cpath d='M28 32 L50 68 L72 32' stroke='white' stroke-width='10' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Cpath d='M50 20 L50 62' stroke='white' stroke-width='10' stroke-linecap='round' fill='none'/%3E%3C/svg%3E" type="image/svg+xml">
+
+  <!-- Master Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ==================== PAGE 1: KEYAUTH LOGIN PAGE ==================== -->
+  <div id="loginView" class="app-view active">
+    <div class="login-card">
+      <div class="login-brand-header">
+        <div class="brand-icon-lg">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
+          </svg>
+        </div>
+        <h1 class="login-title">
+          VEROX <span>DOWNLOADER</span>
+        </h1>
+        <p class="login-subtitle">
+          Universal Social Media Downloader with Turbo 4K & Lossless MP3
+        </p>
+      </div>
+
+      <!-- Device Hardware ID Status Badge -->
+      <div id="deviceHwidBadge" style="display: flex; align-items: center; justify-content: space-between; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 10px; padding: 9px 14px; margin-bottom: 16px; font-size: 0.78rem; color: #a3a3b2;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="display: inline-block; width: 8px; height: 8px; background: #00e676; border-radius: 50%; box-shadow: 0 0 8px #00e676;"></span>
+          <span>HWID:</span>
+          <strong id="displayHwidVal" style="font-family: monospace; color: #fff; letter-spacing: 0.5px;">Auto-Detecting...</strong>
+        </div>
+        <button type="button" id="btnResetLocalHwid" style="background: none; border: none; color: #ff333f; cursor: pointer; font-size: 0.75rem; text-decoration: underline; font-weight: 600;" title="Click to regenerate browser hardware fingerprint">
+          Reset HWID
+        </button>
+      </div>
+
+      <!-- Error Notification -->
+      <div id="loginErrorAlert" class="login-error-alert">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+        </svg>
+        <span id="loginErrorMsg">Invalid KeyAuth credentials.</span>
+      </div>
+
+      <!-- KeyAuth Form -->
+      <form id="keyauthForm" class="login-form" onsubmit="handleKeyAuthLogin(event); return false;">
+        <div class="login-input-group">
+          <label class="login-label" for="keyauthUsername">KeyAuth Username</label>
+          <div class="login-input-wrap">
+            <input
+              type="text"
+              id="keyauthUsername"
+              name="keyauthUsername"
+              class="login-input"
+              placeholder="Enter your username or license key"
+              autocomplete="username"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="login-input-group">
+          <label class="login-label" for="keyauthPassword">KeyAuth Password</label>
+          <div class="login-input-wrap">
+            <input
+              type="password"
+              id="keyauthPassword"
+              name="keyauthPassword"
+              class="login-input"
+              placeholder="••••••••••••"
+              autocomplete="current-password"
+            />
+          </div>
+        </div>
+
+        <!-- Remember Me Checkbox -->
+        <div class="remember-me-row">
+          <label class="remember-me-label" for="rememberMeCheckbox">
+            <input type="checkbox" id="rememberMeCheckbox" class="remember-me-checkbox" checked />
+            <span class="custom-checkbox">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+            </span>
+            <span class="remember-text">Remember Me (Save login on this device)</span>
+          </label>
+        </div>
+
+        <button type="submit" id="btnLoginPremium" class="btn-login-premium" onclick="handleKeyAuthLogin(event)">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+          </svg>
+          <span>Login as Premium (VIP)</span>
+        </button>
+      </form>
+
+      <div class="login-divider">
+        <span>OR</span>
+      </div>
+
+      <!-- Continue as Free Tier -->
+      <button type="button" id="btnContinueFree" class="btn-continue-free">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+        </svg>
+        <span>Continue as Free Tier (Guest Mode)</span>
+      </button>
+
+      <div class="login-footer-info">
+        <p>
+          Need a Premium account or license key?<br />
+          <a
+            href="https://wa.me/94724074632?text=Hello%20VEROX%20MEDIA%2C%20I%20want%20to%20buy%20a%20Premium%20Account."
+            target="_blank"
+            rel="noopener noreferrer"
+            style="color: #ff333f; font-weight: 700; cursor: pointer;"
+            onclick="handleVIPPurchase('VIP Premium Account'); return false;"
+          >
+            Order on WhatsApp (+94724074632)
+          </a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== PAGE 2: DOWNLOADER DASHBOARD ==================== -->
+  <div id="dashboardView" class="app-view">
+    
+    <!-- Top Navbar -->
+    <header class="navbar">
+      <div class="nav-container">
+        <div class="brand">
+          <div class="brand-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
+            </svg>
+          </div>
+          <div class="brand-name">
+            VEROX <span>DOWNLOADER</span>
+          </div>
+        </div>
+
+        <!-- Dynamic Top Navigation Tabs (Dynamic UI based on Free vs Premium) -->
+        <nav class="nav-center-tabs">
+          <button id="navTabVideo" class="nav-tab-btn active">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+            </svg>
+            <span>Video</span>
+          </button>
+
+          <button id="navTabAudio" class="nav-tab-btn">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+            </svg>
+            <span>Audio</span>
+          </button>
+
+          <!-- FREE TIER ONLY: Premium Pricing & Plans Tab -->
+          <button id="navTabPremium" class="nav-tab-btn premium-tab-btn">
+            <svg class="crown-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .55-.45 1-1 1H6c-.55 0-1-.45-1-1v-1h14v1z"/>
+            </svg>
+            <span>Premium</span>
+          </button>
+
+          <!-- PREMIUM TIER EXCLUSIVE: PC Optimization Tab -->
+          <button id="navTabPcOpt" class="nav-tab-btn vip-pro-tab-btn" style="display: none;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M13 3L4 14h7v7l9-11h-7V3z"/>
+            </svg>
+            <span>PC Optimization</span>
+          </button>
+
+          <!-- PREMIUM TIER EXCLUSIVE: Network Tweaks Tab -->
+          <button id="navTabNetTweaks" class="nav-tab-btn vip-pro-tab-btn" style="display: none;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+            </svg>
+            <span>Network Tweaks</span>
+          </button>
+
+          <!-- PREMIUM TIER EXCLUSIVE: Pro Utilities Tab -->
+          <button id="navTabProUtils" class="nav-tab-btn vip-pro-tab-btn" style="display: none;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/>
+            </svg>
+            <span>Pro Utilities</span>
+          </button>
+
+          <!-- PREMIUM TIER EXCLUSIVE: User Information Tab -->
+          <button id="navTabUserInfo" class="nav-tab-btn vip-pro-tab-btn" style="display: none;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+            <span>User Information</span>
+          </button>
+        </nav>
+
+        <!-- User Status Badge & Actions -->
+        <div class="nav-actions">
+          <span id="userBadge" class="badge-pro">
+            🆓 FREE TIER
+          </span>
+          <button id="btnLogout" class="nav-btn" title="Logout or Switch User">
+            Logout
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-wrapper">
+
+      <!-- TAB 1 & 2: DOWNLOADER VIEW -->
+      <div id="tabDownloader" class="tab-section active">
+        <!-- Hero -->
+        <section class="hero">
+          <div class="hero-pill">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+              <path d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 16h2v2h-2zm0-6h2v4h-2z"/>
+            </svg>
+            <span>HIGH-SPEED ENGINE • ZERO CORS RESTRICTIONS</span>
+          </div>
+
+          <h1 class="hero-title">
+            <span class="gradient-text">VEROX MEDIA DOWNLOADER</span>
+          </h1>
+          <p class="hero-subtitle">
+            Universal social media downloader for YouTube, TikTok, Facebook, Instagram, Twitter/X, and Reddit.
+          </p>
+        </section>
+
+        <!-- Downloader Box -->
+        <section class="downloader-box">
+          <div class="input-container">
+            <div id="platformBadge" class="platform-detector-badge">
+              <span id="platformBadgeText">Auto-Detecting...</span>
+            </div>
+
+            <div class="input-row">
+              <div class="input-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                  <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+                </svg>
+              </div>
+              <input
+                type="url"
+                id="urlInput"
+                class="url-input"
+                placeholder="Paste video link (YouTube, TikTok, Facebook, Instagram)..."
+                autocomplete="off"
+                spellcheck="false"
+              />
+              <div class="input-buttons">
+                <button id="btnClear" class="btn-icon-action" title="Clear">Clear</button>
+                <button id="btnPaste" class="btn-icon-action btn-paste" title="Paste">Paste</button>
+              </div>
+            </div>
+
+            <button id="btnFetch" class="btn-fetch">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5v-9l6 4.5-6 4.5z"/>
+              </svg>
+              <span>Fetch Media & Details</span>
+            </button>
+          </div>
+
+          <!-- Real-Time Progress Bar -->
+          <div id="statusTracker" class="status-tracker">
+            <div class="status-info">
+              <span id="statusStepText" class="status-text">
+                <span class="spinner"></span> Processing stream...
+              </span>
+              <span id="statusPercentage" class="status-percentage">25%</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div id="progressBarFill" class="progress-bar-fill"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Media Preview Card -->
+        <section id="mediaPreviewCard" class="media-preview-card">
+          <div class="preview-grid">
+            <div class="thumbnail-wrap">
+              <img id="previewThumbnail" class="preview-thumbnail" src="" alt="Thumbnail" />
+              <div class="platform-floating-tag">
+                <span id="tagPlatformName">Platform</span>
+              </div>
+            </div>
+
+            <div class="preview-details">
+              <div>
+                <h2 id="previewTitle" class="preview-title">Media Title</h2>
+                <div id="previewAuthor" class="preview-author">Author</div>
+              </div>
+
+              <div class="controls-panel">
+                <div class="control-header-row">
+                  <label id="qualitySectionLabel" class="control-label">Select Resolution:</label>
+                  <span id="freemiumHint" class="freemium-hint">Free Tier: 360p Only</span>
+                </div>
+                <!-- Freemium Quality Selector Chips Container -->
+                <div id="qualityChipsContainer" class="quality-chips-grid"></div>
+              </div>
+
+              <!-- Download Button -->
+              <button id="btnDownloadMain" class="btn-download-main">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                  <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
+                </svg>
+                <span id="downloadBtnText">Download Now (360p MP4)</span>
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- TAB 3: PREMIUM PACKAGES & WHATSAPP REDIRECTION -->
+      <div id="tabPremium" class="tab-section">
+        <div class="premium-view-container">
+          <div class="pricing-header">
+            <div class="pricing-tag">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+              </svg>
+              <span>VIP SUBSCRIPTION PLANS</span>
+            </div>
+            <h2 class="pricing-title">Upgrade to <span>VEROX PREMIUM</span></h2>
+            <p class="pricing-sub">
+              Unlock unrestricted 4K Ultra HD video, 1080p 60FPS, 320kbps Studio Audio, and turbo-accelerated download nodes.
+            </p>
+          </div>
+
+          <!-- 3 PACKAGES WITH DIRECT PRE-GENERATED WHATSAPP REDIRECTION -->
+          <div class="pricing-cards-grid">
+            
+            <!-- PACKAGE 1: 1 Month - 1000 -->
+            <div class="pricing-card">
+              <div>
+                <div class="plan-name">1 Month Plan</div>
+                <div class="plan-price-wrap">
+                  <span class="plan-currency">LKR</span>
+                  <span class="plan-amount">1,000</span>
+                  <span class="plan-period">/ 30 Days</span>
+                </div>
+                <ul class="plan-features-list">
+                  <li class="plan-feature-item">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    <span>Unlock 1080p Full HD Video</span>
+                  </li>
+                  <li class="plan-feature-item">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    <span>Unlock 320kbps MP3 Audio</span>
+                  </li>
+                  <li class="plan-feature-item">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    <span>TikTok Watermark Removal</span>
+                  </li>
+                  <li class="plan-feature-item">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    <span>High-Speed Turbo Bandwidth</span>
+                  </li>
+                </ul>
+              </div>
+
+              <a
+                href="https://wa.me/94724074632?text=Hello%20VEROX%20MEDIA%2C%20I%20want%20to%20purchase%20the%201%20Month%20VIP%20Premium%20Package."
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn-whatsapp-buy"
+                data-plan="1 Month Plan"
+                onclick="handleVIPPurchase('1 Month Plan'); return false;"
+              >
+                <svg viewBox="0 0 24 24">
+                  <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                </svg>
+                <span>Buy Now via WhatsApp</span>
+              </a>
+            </div>
+
+            <!-- PACKAGE 2: 2 Months - 1500 (MOST POPULAR) -->
+            <div class="pricing-card featured">
+              <div class="featured-ribbon">🔥 MOST POPULAR</div>
+              <div>
+                <div class="plan-name">2 Months Plan</div>
+                <div class="plan-price-wrap">
+                  <span class="plan-currency">LKR</span>
+                  <span class="plan-amount">1,500</span>
+                  <span class="plan-period">/ 60 Days</span>
+                </div>
+                <ul class="plan-features-list">
+                  <li class="plan-feature-item">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    <span>Unlock 4K Ultra HD & 1080p 60FPS</span>
+                  </li>
+                  <li class="plan-feature-item">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    <span>Studio Master 320kbps MP3</span>
+                  </li>
+                  <li class="plan-feature-item">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    <span>Multi-Connection Turbo Accelerator</span>
+                  </li>
+                  <li class="plan-feature-item">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    <span>24/7 Priority WhatsApp Support</span>
+                  </li>
+                </ul>
+              </div>
+
+              <a
+                href="https://wa.me/94724074632?text=Hello%20VEROX%20MEDIA%2C%20I%20want%20to%20purchase%20the%202%20Months%20VIP%20Premium%20Package."
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn-whatsapp-buy"
+                data-plan="2 Months Plan"
+                onclick="handleVIPPurchase('2 Months Plan'); return false;"
+              >
+                <svg viewBox="0 0 24 24">
+                  <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                </svg>
+                <span>Buy Now via WhatsApp</span>
+              </a>
+            </div>
+
+            <!-- PACKAGE 3: Lifetime - 2500 (BEST VALUE) -->
+            <div class="pricing-card">
+              <div class="featured-ribbon lifetime-ribbon">👑 BEST VALUE</div>
+              <div>
+                <div class="plan-name">Lifetime Plan</div>
+                <div class="plan-price-wrap">
+                  <span class="plan-currency">LKR</span>
+                  <span class="plan-amount">2,500</span>
+                  <span class="plan-period">/ Permanent</span>
+                </div>
+                <ul class="plan-features-list">
+                  <li class="plan-feature-item">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    <span>Unlimited Lifetime VIP Access</span>
+                  </li>
+                  <li class="plan-feature-item">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    <span>All Future Platform Updates</span>
+                  </li>
+                  <li class="plan-feature-item">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    <span>Maximum Gigabit Speeds</span>
+                  </li>
+                  <li class="plan-feature-item">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    <span>Instant VIP Account Setup</span>
+                  </li>
+                </ul>
+              </div>
+
+              <a
+                href="https://wa.me/94724074632?text=Hello%20VEROX%20MEDIA%2C%20I%20want%20to%20purchase%20the%20Lifetime%20VIP%20Premium%20Package."
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn-whatsapp-buy"
+                data-plan="Lifetime Plan"
+                onclick="handleVIPPurchase('Lifetime Plan'); return false;"
+              >
+                <svg viewBox="0 0 24 24">
+                  <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                </svg>
+                <span>Buy Now via WhatsApp</span>
+              </a>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 4: PC OPTIMIZATION (PREMIUM EXCLUSIVE) ==================== -->
+      <div id="tabPcOpt" class="tab-section">
+        <div class="util-section-container">
+          <div class="util-header">
+            <div class="util-tag">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M13 3L4 14h7v7l9-11h-7V3z"/>
+              </svg>
+              <span>VIP EXCLUSIVE: PC PERFORMANCE ENGINE</span>
+            </div>
+            <h2 class="util-title">Windows <span>PC Optimization</span> Suite</h2>
+            <p class="util-desc">
+              High-impact CMD and PowerShell commands curated for VIP members. Purge junk, fix corrupt files, disable throttling, and squeeze maximum FPS and responsiveness out of your PC.
+            </p>
+          </div>
+
+          <div class="util-cards-grid">
+            
+            <!-- CARD 1: SFC Scannow -->
+            <div class="util-card">
+              <div>
+                <div class="util-card-header">
+                  <div class="util-card-title-group">
+                    <div class="util-card-icon">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+                    </div>
+                    <div class="util-card-title">System File Integrity Checker</div>
+                  </div>
+                  <span class="util-badge cmd">CMD - Admin</span>
+                </div>
+                <p class="util-card-desc">
+                  Scans all protected Windows system files and automatically replaces corrupted, damaged, or altered files with clean cached copies.
+                </p>
+                <div class="util-tutorial-box">
+                  <div class="util-tutorial-label">⚡ Execution Tutorial:</div>
+                  <div class="util-step-item"><span class="util-step-num">1</span><span>Press <strong>Win + S</strong>, type <strong>cmd</strong>, right-click and select <strong>"Run as administrator"</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">2</span><span>Click <strong>"Copy Command"</strong> below, paste it into the Command Prompt and hit <strong>Enter</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">3</span><span>Wait until verification reaches 100%. If corruptions are found, Windows repairs them automatically.</span></div>
+                </div>
+              </div>
+              <div class="util-code-container">
+                <div class="util-code-topbar">
+                  <span class="util-code-lang">cmd.exe</span>
+                  <button type="button" class="btn-copy-cmd" data-cmd="sfc /scannow">📋 Copy Command</button>
+                </div>
+                <div class="util-code-content">sfc /scannow</div>
+              </div>
+            </div>
+
+            <!-- CARD 2: DISM RestoreHealth -->
+            <div class="util-card">
+              <div>
+                <div class="util-card-header">
+                  <div class="util-card-title-group">
+                    <div class="util-card-icon">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+                    </div>
+                    <div class="util-card-title">DISM Component Store Repair</div>
+                  </div>
+                  <span class="util-badge cmd">CMD - Admin</span>
+                </div>
+                <p class="util-card-desc">
+                  Repairs damaged Windows Component Store packages and system images using official Windows update servers. Fixes Blue Screens (BSOD) and deep corruptions.
+                </p>
+                <div class="util-tutorial-box">
+                  <div class="util-tutorial-label">⚡ Execution Tutorial:</div>
+                  <div class="util-step-item"><span class="util-step-num">1</span><span>Open <strong>Command Prompt as Administrator</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">2</span><span>Paste the command below and press <strong>Enter</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">3</span><span>Allow the progress bar to reach 100%. It will report "The restore operation completed successfully".</span></div>
+                </div>
+              </div>
+              <div class="util-code-container">
+                <div class="util-code-topbar">
+                  <span class="util-code-lang">cmd.exe</span>
+                  <button type="button" class="btn-copy-cmd" data-cmd="DISM /Online /Cleanup-Image /RestoreHealth">📋 Copy Command</button>
+                </div>
+                <div class="util-code-content">DISM /Online /Cleanup-Image /RestoreHealth</div>
+              </div>
+            </div>
+
+            <!-- CARD 3: Deep Temp Purge -->
+            <div class="util-card">
+              <div>
+                <div class="util-card-header">
+                  <div class="util-card-title-group">
+                    <div class="util-card-icon">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                    </div>
+                    <div class="util-card-title">Deep Junk & Temp Cache Purge</div>
+                  </div>
+                  <span class="util-badge fps">Fast Cleanup</span>
+                </div>
+                <p class="util-card-desc">
+                  Instantly reclaims gigabytes of disk space by purging user temporary files, Windows system temp, and old Windows Update distribution payloads.
+                </p>
+                <div class="util-tutorial-box">
+                  <div class="util-tutorial-label">⚡ Execution Tutorial:</div>
+                  <div class="util-step-item"><span class="util-step-num">1</span><span>Open <strong>Command Prompt as Administrator</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">2</span><span>Copy and paste the command below, then press <strong>Enter</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">3</span><span>Any in-use locked files will be skipped safely while all remaining gigabytes of junk are cleared.</span></div>
+                </div>
+              </div>
+              <div class="util-code-container">
+                <div class="util-code-topbar">
+                  <span class="util-code-lang">cmd.exe</span>
+                  <button type="button" class="btn-copy-cmd" data-cmd="del /q/f/s &quot;%temp%\*&quot; 2>nul &amp; del /s /q C:\Windows\temp\* 2>nul &amp; rd /s /q C:\Windows\SoftwareDistribution\Download 2>nul">📋 Copy Command</button>
+                </div>
+                <div class="util-code-content">del /q/f/s "%temp%\*" 2>nul & del /s /q C:\Windows\temp\* 2>nul & rd /s /q C:\Windows\SoftwareDistribution\Download 2>nul</div>
+              </div>
+            </div>
+
+            <!-- CARD 4: Ultimate Performance Power Plan -->
+            <div class="util-card">
+              <div>
+                <div class="util-card-header">
+                  <div class="util-card-title-group">
+                    <div class="util-card-icon">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+                    </div>
+                    <div class="util-card-title">Unlock "Ultimate Performance" Plan</div>
+                  </div>
+                  <span class="util-badge fps">FPS Boost</span>
+                </div>
+                <p class="util-card-desc">
+                  Unlocks Windows hidden OEM "Ultimate Performance" power scheme. Eliminates CPU core parking, micro-latencies, and throttling during heavy gaming or rendering.
+                </p>
+                <div class="util-tutorial-box">
+                  <div class="util-tutorial-label">⚡ Execution Tutorial:</div>
+                  <div class="util-step-item"><span class="util-step-num">1</span><span>Open <strong>Command Prompt as Administrator</strong>, paste command and hit <strong>Enter</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">2</span><span>Press <strong>Win + R</strong>, type <strong>powercfg.cpl</strong> and press Enter.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">3</span><span>Under "Additional plans", select the newly unlocked <strong>"Ultimate Performance"</strong> plan.</span></div>
+                </div>
+              </div>
+              <div class="util-code-container">
+                <div class="util-code-topbar">
+                  <span class="util-code-lang">cmd.exe</span>
+                  <button type="button" class="btn-copy-cmd" data-cmd="powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61">📋 Copy Command</button>
+                </div>
+                <div class="util-code-content">powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61</div>
+              </div>
+            </div>
+
+            <!-- CARD 5: Rebuild Explorer Icon Cache -->
+            <div class="util-card">
+              <div>
+                <div class="util-card-header">
+                  <div class="util-card-title-group">
+                    <div class="util-card-icon">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                    </div>
+                    <div class="util-card-title">Rebuild Icon & Thumbnail Cache</div>
+                  </div>
+                  <span class="util-badge cmd">CMD - Admin</span>
+                </div>
+                <p class="util-card-desc">
+                  Fixes broken, missing, or blank desktop/taskbar icons and speeds up slow File Explorer folder loading by rebuilding database caches from scratch.
+                </p>
+                <div class="util-tutorial-box">
+                  <div class="util-tutorial-label">⚡ Execution Tutorial:</div>
+                  <div class="util-step-item"><span class="util-step-num">1</span><span>Open <strong>Command Prompt as Administrator</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">2</span><span>Paste the command and hit <strong>Enter</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">3</span><span>Windows Explorer will momentarily close and relaunch with refreshed, razor-sharp icons.</span></div>
+                </div>
+              </div>
+              <div class="util-code-container">
+                <div class="util-code-topbar">
+                  <span class="util-code-lang">cmd.exe</span>
+                  <button type="button" class="btn-copy-cmd" data-cmd="taskkill /f /im explorer.exe &amp; del /f /s /q /a &quot;%localappdata%\IconCache.db&quot; &amp; del /f /s /q /a &quot;%localappdata%\Microsoft\Windows\Explorer\thumbcache_*.db&quot; &amp; start explorer.exe">📋 Copy Command</button>
+                </div>
+                <div class="util-code-content">taskkill /f /im explorer.exe & del /f /s /q /a "%localappdata%\IconCache.db" & del /f /s /q /a "%localappdata%\Microsoft\Windows\Explorer\thumbcache_*.db" & start explorer.exe</div>
+              </div>
+            </div>
+
+            <!-- CARD 6: Chris Titus Utility -->
+            <div class="util-card">
+              <div>
+                <div class="util-card-header">
+                  <div class="util-card-title-group">
+                    <div class="util-card-icon">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+                    </div>
+                    <div class="util-card-title">Chris Titus Windows Debloat Tool</div>
+                  </div>
+                  <span class="util-badge ps">PowerShell - Admin</span>
+                </div>
+                <p class="util-card-desc">
+                  The industry-standard open source utility for Windows 10/11. Safely removes built-in bloatware, disables edge background processes, and applies essential tweaks with 1 click.
+                </p>
+                <div class="util-tutorial-box">
+                  <div class="util-tutorial-label">⚡ Execution Tutorial:</div>
+                  <div class="util-step-item"><span class="util-step-num">1</span><span>Press <strong>Win + X</strong> and choose <strong>"Terminal (Admin)"</strong> or <strong>"PowerShell (Admin)"</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">2</span><span>Paste the command below and hit <strong>Enter</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">3</span><span>A modern graphical window will launch. Click the <strong>"Tweaks"</strong> tab and select <strong>"Desktop"</strong> or <strong>"Laptop"</strong> recommendations!</span></div>
+                </div>
+              </div>
+              <div class="util-code-container">
+                <div class="util-code-topbar">
+                  <span class="util-code-lang">powershell.exe</span>
+                  <button type="button" class="btn-copy-cmd" data-cmd="iwr -useb https://christitus.com/win | iex">📋 Copy Command</button>
+                </div>
+                <div class="util-code-content">iwr -useb https://christitus.com/win | iex</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 5: NETWORK TWEAKS (PREMIUM EXCLUSIVE) ==================== -->
+      <div id="tabNetTweaks" class="tab-section">
+        <div class="util-section-container">
+          <div class="util-header">
+            <div class="util-tag">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+              </svg>
+              <span>VIP GAMING ACCELERATOR: NETWORK LATENCY ENGINE</span>
+            </div>
+            <h2 class="util-title">Network & <span>Ping Optimization</span> Tweaks</h2>
+            <p class="util-desc">
+              Curated network stack commands to eliminate packet loss, flush stale DNS resolvers, lower gaming ping, and achieve maximum throughput on broadband and fiber connections.
+            </p>
+          </div>
+
+          <div class="util-cards-grid">
+            
+            <!-- NET CARD 1: Flush DNS & Renew IP -->
+            <div class="util-card">
+              <div>
+                <div class="util-card-header">
+                  <div class="util-card-title-group">
+                    <div class="util-card-icon">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                    </div>
+                    <div class="util-card-title">DNS Flush & DHCP IP Renewal</div>
+                  </div>
+                  <span class="util-badge cmd">CMD - Admin</span>
+                </div>
+                <p class="util-card-desc">
+                  Purges corrupted or stale DNS resolution cache, re-registers DNS client tables, and fetches a fresh DHCP IP address lease from your router.
+                </p>
+                <div class="util-tutorial-box">
+                  <div class="util-tutorial-label">⚡ Execution Tutorial:</div>
+                  <div class="util-step-item"><span class="util-step-num">1</span><span>Open <strong>Command Prompt as Administrator</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">2</span><span>Click <strong>"Copy Command"</strong> below, paste it and hit <strong>Enter</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">3</span><span>Resolves browser loading lag, gaming disconnects, and domain resolution delays.</span></div>
+                </div>
+              </div>
+              <div class="util-code-container">
+                <div class="util-code-topbar">
+                  <span class="util-code-lang">cmd.exe</span>
+                  <button type="button" class="btn-copy-cmd" data-cmd="ipconfig /flushdns &amp; ipconfig /registerdns &amp; ipconfig /release &amp; ipconfig /renew">📋 Copy Command</button>
+                </div>
+                <div class="util-code-content">ipconfig /flushdns & ipconfig /registerdns & ipconfig /release & ipconfig /renew</div>
+              </div>
+            </div>
+
+            <!-- NET CARD 2: Reset TCP/IP & Winsock -->
+            <div class="util-card">
+              <div>
+                <div class="util-card-header">
+                  <div class="util-card-title-group">
+                    <div class="util-card-icon">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+                    </div>
+                    <div class="util-card-title">Reset TCP/IP Stack & Winsock</div>
+                  </div>
+                  <span class="util-badge fps">Fix Latency</span>
+                </div>
+                <p class="util-card-desc">
+                  Re-initializes the entire Windows networking stack, routing tables, and Winsock socket API. Resolves severe packet loss, rubberbanding, and sudden connection drops.
+                </p>
+                <div class="util-tutorial-box">
+                  <div class="util-tutorial-label">⚡ Execution Tutorial:</div>
+                  <div class="util-step-item"><span class="util-step-num">1</span><span>Open <strong>Command Prompt as Administrator</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">2</span><span>Paste the command below and press <strong>Enter</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">3</span><span>Restart your computer after running this command to boot into a clean network stack.</span></div>
+                </div>
+              </div>
+              <div class="util-code-container">
+                <div class="util-code-topbar">
+                  <span class="util-code-lang">cmd.exe</span>
+                  <button type="button" class="btn-copy-cmd" data-cmd="netsh int ip reset &amp; netsh winsock reset">📋 Copy Command</button>
+                </div>
+                <div class="util-code-content">netsh int ip reset & netsh winsock reset</div>
+              </div>
+            </div>
+
+            <!-- NET CARD 3: Cloudflare 1.1.1.1 Gaming DNS -->
+            <div class="util-card">
+              <div>
+                <div class="util-card-header">
+                  <div class="util-card-title-group">
+                    <div class="util-card-icon">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>
+                    </div>
+                    <div class="util-card-title">Cloudflare 1.1.1.1 Ultra-Low Latency DNS</div>
+                  </div>
+                  <span class="util-badge ps">PowerShell - Admin</span>
+                </div>
+                <p class="util-card-desc">
+                  Automatically sets Cloudflare's 1.1.1.1 & 1.0.0.1 DNS across all active network adapters. Cloudflare boasts the world's fastest global query response time for online multiplayer games.
+                </p>
+                <div class="util-tutorial-box">
+                  <div class="util-tutorial-label">⚡ Execution Tutorial:</div>
+                  <div class="util-step-item"><span class="util-step-num">1</span><span>Press <strong>Win + X</strong> and choose <strong>"Terminal (Admin)"</strong> or <strong>"PowerShell (Admin)"</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">2</span><span>Paste the command below and hit <strong>Enter</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">3</span><span>Instantly activates Cloudflare DNS on your active Ethernet/Wi-Fi connection without a reboot!</span></div>
+                </div>
+              </div>
+              <div class="util-code-container">
+                <div class="util-code-topbar">
+                  <span class="util-code-lang">powershell.exe</span>
+                  <button type="button" class="btn-copy-cmd" data-cmd="Get-NetAdapter | Where-Object {$_.Status -eq &quot;Up&quot;} | Set-DnsClientServerAddress -ServerAddresses (&quot;1.1.1.1&quot;,&quot;1.0.0.1&quot;)">📋 Copy Command</button>
+                </div>
+                <div class="util-code-content">Get-NetAdapter | Where-Object {$_.Status -eq "Up"} | Set-DnsClientServerAddress -ServerAddresses ("1.1.1.1","1.0.0.1")</div>
+              </div>
+            </div>
+
+            <!-- NET CARD 4: Google DNS -->
+            <div class="util-card">
+              <div>
+                <div class="util-card-header">
+                  <div class="util-card-title-group">
+                    <div class="util-card-icon">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                    </div>
+                    <div class="util-card-title">Google 8.8.8.8 Ultra-Reliable DNS</div>
+                  </div>
+                  <span class="util-badge ps">PowerShell - Admin</span>
+                </div>
+                <p class="util-card-desc">
+                  Switches your connection to Google Public DNS (8.8.8.8 & 8.8.4.4). Known worldwide for rock-solid stability, zero censorship, and flawless high-bandwidth media streaming.
+                </p>
+                <div class="util-tutorial-box">
+                  <div class="util-tutorial-label">⚡ Execution Tutorial:</div>
+                  <div class="util-step-item"><span class="util-step-num">1</span><span>Open <strong>PowerShell as Administrator</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">2</span><span>Paste the command below and press <strong>Enter</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">3</span><span>Eliminates ISP DNS caching issues and provides seamless download streaming.</span></div>
+                </div>
+              </div>
+              <div class="util-code-container">
+                <div class="util-code-topbar">
+                  <span class="util-code-lang">powershell.exe</span>
+                  <button type="button" class="btn-copy-cmd" data-cmd="Get-NetAdapter | Where-Object {$_.Status -eq &quot;Up&quot;} | Set-DnsClientServerAddress -ServerAddresses (&quot;8.8.8.8&quot;,&quot;8.8.4.4&quot;)">📋 Copy Command</button>
+                </div>
+                <div class="util-code-content">Get-NetAdapter | Where-Object {$_.Status -eq "Up"} | Set-DnsClientServerAddress -ServerAddresses ("8.8.8.8","8.8.4.4")</div>
+              </div>
+            </div>
+
+            <!-- NET CARD 5: TCP Window Autotuning -->
+            <div class="util-card">
+              <div>
+                <div class="util-card-header">
+                  <div class="util-card-title-group">
+                    <div class="util-card-icon">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/></svg>
+                    </div>
+                    <div class="util-card-title">Optimize TCP Window Autotuning</div>
+                  </div>
+                  <span class="util-badge cmd">Throughput</span>
+                </div>
+                <p class="util-card-desc">
+                  Enables optimal dynamic TCP receive window auto-tuning. Prevents Windows from throttling your maximum download throughput on high-speed internet connections.
+                </p>
+                <div class="util-tutorial-box">
+                  <div class="util-tutorial-label">⚡ Execution Tutorial:</div>
+                  <div class="util-step-item"><span class="util-step-num">1</span><span>Open <strong>Command Prompt as Administrator</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">2</span><span>Paste the command below and hit <strong>Enter</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">3</span><span>Verify that CMD outputs: <strong>"Ok."</strong> This instantly unlocks full line speed.</span></div>
+                </div>
+              </div>
+              <div class="util-code-container">
+                <div class="util-code-topbar">
+                  <span class="util-code-lang">cmd.exe</span>
+                  <button type="button" class="btn-copy-cmd" data-cmd="netsh int tcp set global autotuninglevel=normal">📋 Copy Command</button>
+                </div>
+                <div class="util-code-content">netsh int tcp set global autotuninglevel=normal</div>
+              </div>
+            </div>
+
+            <!-- NET CARD 6: Disable Network Throttling Index -->
+            <div class="util-card">
+              <div>
+                <div class="util-card-header">
+                  <div class="util-card-title-group">
+                    <div class="util-card-icon">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M13 2.05v3.03c3.39.49 6 3.39 6 6.92 0 .9-.18 1.75-.48 2.54l2.6 1.53c.56-1.24.88-2.62.88-4.07 0-5.18-3.95-9.45-9-9.95zM12 19c-3.87 0-7-3.13-7-7 0-3.53 2.61-6.43 6-6.92V2.05c-5.05.5-9 4.77-9 9.95 0 5.52 4.48 10 10 10 2.45 0 4.69-.89 6.43-2.36l-2.14-1.78C14.95 18.52 13.54 19 12 19z"/></svg>
+                    </div>
+                    <div class="util-card-title">Disable Network Throttling Index</div>
+                  </div>
+                  <span class="util-badge reg">Gaming Ping</span>
+                </div>
+                <p class="util-card-desc">
+                  Windows by default throttles non-multimedia network packets when audio/video is playing. This registry tweak disables throttling, giving online games top priority.
+                </p>
+                <div class="util-tutorial-box">
+                  <div class="util-tutorial-label">⚡ Execution Tutorial:</div>
+                  <div class="util-step-item"><span class="util-step-num">1</span><span>Open <strong>Command Prompt as Administrator</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">2</span><span>Paste the registry command below and hit <strong>Enter</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">3</span><span>Output will say "The operation completed successfully". Safe, tested, and reversible.</span></div>
+                </div>
+              </div>
+              <div class="util-code-container">
+                <div class="util-code-topbar">
+                  <span class="util-code-lang">cmd.exe (reg)</span>
+                  <button type="button" class="btn-copy-cmd" data-cmd="reg add &quot;HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile&quot; /v &quot;NetworkThrottlingIndex&quot; /t REG_DWORD /d 4294967295 /f">📋 Copy Command</button>
+                </div>
+                <div class="util-code-content">reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v "NetworkThrottlingIndex" /t REG_DWORD /d 4294967295 /f</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 6: PRO UTILITIES (PREMIUM EXCLUSIVE) ==================== -->
+      <div id="tabProUtils" class="tab-section">
+        <div class="util-section-container">
+          <div class="util-header">
+            <div class="util-tag">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/>
+              </svg>
+              <span>VIP SECRETS & POWER TOOLS</span>
+            </div>
+            <h2 class="util-title">Windows <span>Pro Utilities</span> & Tweaks</h2>
+            <p class="util-desc">
+              Advanced power-user utilities, telemetry blockers, background RAM liberators, and essential Windows hotkeys for total control over your operating system.
+            </p>
+          </div>
+
+          <div class="util-cards-grid">
+            
+            <!-- PRO CARD 1: Disable Telemetry -->
+            <div class="util-card">
+              <div>
+                <div class="util-card-header">
+                  <div class="util-card-title-group">
+                    <div class="util-card-icon">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+                    </div>
+                    <div class="util-card-title">Block Windows Diagnostic Telemetry</div>
+                  </div>
+                  <span class="util-badge reg">Privacy & RAM</span>
+                </div>
+                <p class="util-card-desc">
+                  Completely disables background telemetry services and diagnostic data collection, saving CPU cycles, disk read/write bandwidth, and battery life.
+                </p>
+                <div class="util-tutorial-box">
+                  <div class="util-tutorial-label">⚡ Execution Tutorial:</div>
+                  <div class="util-step-item"><span class="util-step-num">1</span><span>Open <strong>Command Prompt as Administrator</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">2</span><span>Copy and paste the command below and press <strong>Enter</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">3</span><span>Stops Microsoft Connected User Experiences and Telemetry services from running in the background.</span></div>
+                </div>
+              </div>
+              <div class="util-code-container">
+                <div class="util-code-topbar">
+                  <span class="util-code-lang">cmd.exe (reg)</span>
+                  <button type="button" class="btn-copy-cmd" data-cmd="reg add &quot;HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection&quot; /v &quot;AllowTelemetry&quot; /t REG_DWORD /d 0 /f">📋 Copy Command</button>
+                </div>
+                <div class="util-code-content">reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d 0 /f</div>
+              </div>
+            </div>
+
+            <!-- PRO CARD 2: Disable Background Apps -->
+            <div class="util-card">
+              <div>
+                <div class="util-card-header">
+                  <div class="util-card-title-group">
+                    <div class="util-card-icon">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
+                    </div>
+                    <div class="util-card-title">Disable Background Apps (Frees RAM)</div>
+                  </div>
+                  <span class="util-badge reg">RAM Booster</span>
+                </div>
+                <p class="util-card-desc">
+                  Prevents UWP store apps from running in the background when not in use. Reclaims 500MB to 1.2GB of physical RAM on Windows 10 and 11.
+                </p>
+                <div class="util-tutorial-box">
+                  <div class="util-tutorial-label">⚡ Execution Tutorial:</div>
+                  <div class="util-step-item"><span class="util-step-num">1</span><span>Open <strong>Command Prompt as Administrator</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">2</span><span>Paste the command below and press <strong>Enter</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">3</span><span>Apps will only run when you actively open them, keeping standby memory clear.</span></div>
+                </div>
+              </div>
+              <div class="util-code-container">
+                <div class="util-code-topbar">
+                  <span class="util-code-lang">cmd.exe (reg)</span>
+                  <button type="button" class="btn-copy-cmd" data-cmd="reg add &quot;HKCU\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications&quot; /v &quot;GlobalUserDisabled&quot; /t REG_DWORD /d 1 /f">📋 Copy Command</button>
+                </div>
+                <div class="util-code-content">reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications" /v "GlobalUserDisabled" /t REG_DWORD /d 1 /f</div>
+              </div>
+            </div>
+
+            <!-- PRO CARD 3: Disable Xbox Game Bar DVR -->
+            <div class="util-card">
+              <div>
+                <div class="util-card-header">
+                  <div class="util-card-title-group">
+                    <div class="util-card-icon">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4-3c-.83 0-1.5-.67-1.5-1.5S18.67 9 19.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                    </div>
+                    <div class="util-card-title">Disable Xbox Game Bar & Background DVR</div>
+                  </div>
+                  <span class="util-badge fps">FPS Boost</span>
+                </div>
+                <p class="util-card-desc">
+                  Turns off Windows background gameplay video buffer recording and Game Bar overlays that cause micro-stutters and input lag in competitive FPS games.
+                </p>
+                <div class="util-tutorial-box">
+                  <div class="util-tutorial-label">⚡ Execution Tutorial:</div>
+                  <div class="util-step-item"><span class="util-step-num">1</span><span>Open <strong>Command Prompt as Administrator</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">2</span><span>Paste the command below and press <strong>Enter</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">3</span><span>Instantly stops background video buffer allocation, boosting minimum 1% low FPS.</span></div>
+                </div>
+              </div>
+              <div class="util-code-container">
+                <div class="util-code-topbar">
+                  <span class="util-code-lang">cmd.exe (reg)</span>
+                  <button type="button" class="btn-copy-cmd" data-cmd="reg add &quot;HKCU\System\GameConfigStore&quot; /v &quot;GameDVR_Enabled&quot; /t REG_DWORD /d 0 /f &amp; reg add &quot;HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR&quot; /v &quot;AllowGameDVR&quot; /t REG_DWORD /d 0 /f">📋 Copy Command</button>
+                </div>
+                <div class="util-code-content">reg add "HKCU\System\GameConfigStore" /v "GameDVR_Enabled" /t REG_DWORD /d 0 /f & reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR" /v "AllowGameDVR" /t REG_DWORD /d 0 /f</div>
+              </div>
+            </div>
+
+            <!-- PRO CARD 4: Instant Kill Frozen Apps -->
+            <div class="util-card">
+              <div>
+                <div class="util-card-header">
+                  <div class="util-card-title-group">
+                    <div class="util-card-icon">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>
+                    </div>
+                    <div class="util-card-title">Force Kill All Frozen / Hanging Apps</div>
+                  </div>
+                  <span class="util-badge cmd">Instant Fix</span>
+                </div>
+                <p class="util-card-desc">
+                  Instantly scans RAM for any application marked as "Not Responding" and terminates it cleanly without having to wait for the Windows crash dialog or opening Task Manager.
+                </p>
+                <div class="util-tutorial-box">
+                  <div class="util-tutorial-label">⚡ Execution Tutorial:</div>
+                  <div class="util-step-item"><span class="util-step-num">1</span><span>Press <strong>Win + R</strong>, type <strong>cmd</strong> and press Enter (works in regular CMD).</span></div>
+                  <div class="util-step-item"><span class="util-step-num">2</span><span>Paste the command and hit <strong>Enter</strong> whenever a game or app freezes.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">3</span><span>Instantly unfreezes your desktop in less than 1 second!</span></div>
+                </div>
+              </div>
+              <div class="util-code-container">
+                <div class="util-code-topbar">
+                  <span class="util-code-lang">cmd.exe</span>
+                  <button type="button" class="btn-copy-cmd" data-cmd="taskkill /f /fi &quot;status eq not responding&quot;">📋 Copy Command</button>
+                </div>
+                <div class="util-code-content">taskkill /f /fi "status eq not responding"</div>
+              </div>
+            </div>
+
+            <!-- PRO CARD 5: God Mode Folder -->
+            <div class="util-card">
+              <div>
+                <div class="util-card-header">
+                  <div class="util-card-title-group">
+                    <div class="util-card-icon">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+                    </div>
+                    <div class="util-card-title">Create Windows "God Mode" Folder</div>
+                  </div>
+                  <span class="util-badge cmd">Power Tool</span>
+                </div>
+                <p class="util-card-desc">
+                  Generates an all-in-one "God Mode" control folder on your Desktop giving you instant access to over 200 hidden system management tools in a single place.
+                </p>
+                <div class="util-tutorial-box">
+                  <div class="util-tutorial-label">⚡ Execution Tutorial:</div>
+                  <div class="util-step-item"><span class="util-step-num">1</span><span>Open Command Prompt or press <strong>Win + R</strong> -> type <strong>cmd</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">2</span><span>Paste the command below and hit <strong>Enter</strong>.</span></div>
+                  <div class="util-step-item"><span class="util-step-num">3</span><span>Look at your Desktop! A special control panel icon named "GodMode" is created.</span></div>
+                </div>
+              </div>
+              <div class="util-code-container">
+                <div class="util-code-topbar">
+                  <span class="util-code-lang">cmd.exe</span>
+                  <button type="button" class="btn-copy-cmd" data-cmd="md &quot;%USERPROFILE%\Desktop\GodMode.{ED7BA470-8E54-465E-825C-99712043E01C}&quot;">📋 Copy Command</button>
+                </div>
+                <div class="util-code-content">md "%USERPROFILE%\Desktop\GodMode.{ED7BA470-8E54-465E-825C-99712043E01C}"</div>
+              </div>
+            </div>
+
+            <!-- PRO CARD 6: Windows Power User Shortcuts Cheat Sheet -->
+            <div class="util-card" style="grid-column: 1 / -1;">
+              <div>
+                <div class="util-card-header">
+                  <div class="util-card-title-group">
+                    <div class="util-card-icon">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/></svg>
+                    </div>
+                    <div class="util-card-title">Essential Windows Power-User Shortcuts Cheat Sheet</div>
+                  </div>
+                  <span class="util-badge fps">VIP Pro Guide</span>
+                </div>
+                <p class="util-card-desc">
+                  Crucial keyboard shortcuts that every professional and gamer must know to recover from freezes, capture high-res snips, and access hidden tools in 0.5 seconds:
+                </p>
+                <div class="cheat-sheet-grid">
+                  <div class="cheat-item-card">
+                    <div class="cheat-keys-row">
+                      <span class="kbd-badge">Win</span>+<span class="kbd-badge">Ctrl</span>+<span class="kbd-badge">Shift</span>+<span class="kbd-badge">B</span>
+                    </div>
+                    <div class="cheat-item-desc">
+                      <strong>Restart Graphics Driver</strong>: Fixes sudden black screens, monitor glitches, or frozen game visuals without restarting PC!
+                    </div>
+                  </div>
+
+                  <div class="cheat-item-card">
+                    <div class="cheat-keys-row">
+                      <span class="kbd-badge">Win</span>+<span class="kbd-badge">V</span>
+                    </div>
+                    <div class="cheat-item-desc">
+                      <strong>Clipboard History</strong>: Access all previously copied text, codes, links, and pin items across reboots.
+                    </div>
+                  </div>
+
+                  <div class="cheat-item-card">
+                    <div class="cheat-keys-row">
+                      <span class="kbd-badge">Win</span>+<span class="kbd-badge">Shift</span>+<span class="kbd-badge">S</span>
+                    </div>
+                    <div class="cheat-item-desc">
+                      <strong>Snipping Tool Pro</strong>: Selectively capture regions, active windows, or full displays with instant annotation.
+                    </div>
+                  </div>
+
+                  <div class="cheat-item-card">
+                    <div class="cheat-keys-row">
+                      <span class="kbd-badge">Ctrl</span>+<span class="kbd-badge">Shift</span>+<span class="kbd-badge">Esc</span>
+                    </div>
+                    <div class="cheat-item-desc">
+                      <strong>Direct Task Manager</strong>: Opens Task Manager directly without going through the slow Ctrl+Alt+Del lock menu.
+                    </div>
+                  </div>
+
+                  <div class="cheat-item-card">
+                    <div class="cheat-keys-row">
+                      <span class="kbd-badge">Win</span>+<span class="kbd-badge">X</span> then <span class="kbd-badge">A</span>
+                    </div>
+                    <div class="cheat-item-desc">
+                      <strong>Instant Admin Terminal</strong>: Opens Windows PowerShell / Command Prompt as Administrator in 2 keystrokes!
+                    </div>
+                  </div>
+
+                  <div class="cheat-item-card">
+                    <div class="cheat-keys-row">
+                      <span class="kbd-badge">Win</span>+<span class="kbd-badge">.</span>
+                    </div>
+                    <div class="cheat-item-desc">
+                      <strong>Emoji & Kaomoji Picker</strong>: Native symbols, emojis, math signs, and ASCII faces anywhere in Windows.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 6: USER INFORMATION (PREMIUM EXCLUSIVE) ==================== -->
+      <div id="tabUserInfo" class="tab-section">
+        <div class="util-section-container">
+          <!-- User Info Hero Banner -->
+          <div class="user-info-hero-banner">
+            <div class="user-hero-header">
+              <div class="user-avatar-wrap">
+                <svg viewBox="0 0 24 24" width="36" height="36" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                </svg>
+              </div>
+              <div class="user-hero-meta">
+                <div class="user-hero-badge-row">
+                  <span class="user-rank-badge">👑 VIP PREMIUM</span>
+                  <span class="user-status-pill"><span class="status-dot-live"></span> Active & Verified</span>
+                </div>
+                <h2 id="infoDisplayUsername" class="user-hero-name">Loading...</h2>
+                <p class="user-hero-desc">KeyAuth Authenticated VIP Member • Full Unlimited Access</p>
+              </div>
+            </div>
+
+            <!-- Lifespan Hero Box -->
+            <div class="lifespan-hero-card">
+              <div class="lifespan-hero-label">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                  <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                </svg>
+                <span>SUBSCRIPTION LIFESPAN</span>
+              </div>
+              <div id="infoDisplayLifespan" class="lifespan-hero-value lifetime-glow">Lifetime</div>
+              <div class="lifespan-sub-meta">
+                <span>Expires on:</span>
+                <strong id="infoDisplayExpiryDate">Lifetime Access</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- User Info Details Grid -->
+          <div class="user-info-grid">
+            
+            <!-- Card 1: Credentials & Access -->
+            <div class="user-info-card">
+              <div class="user-card-header">
+                <div class="user-card-icon">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="user-card-title">Account Credentials</h3>
+                  <p class="user-card-desc">Your KeyAuth login username and password</p>
+                </div>
+              </div>
+
+              <!-- Username Row -->
+              <div class="info-field-row">
+                <span class="info-field-label">Username</span>
+                <div class="info-field-action-wrap">
+                  <span id="infoFieldUsernameVal" class="info-field-val">--</span>
+                  <button id="btnCopyInfoUsername" class="btn-copy-chip" title="Copy Username">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                    </svg>
+                    <span>Copy</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Password Row with Eye Reveal & Copy -->
+              <div class="info-field-row">
+                <span class="info-field-label">Password</span>
+                <div class="password-reveal-container">
+                  <input
+                    type="password"
+                    id="infoDisplayPassword"
+                    class="info-password-input"
+                    readonly
+                    value="••••••••••••"
+                  />
+                  <div class="pw-actions-group">
+                    <button type="button" id="btnToggleInfoPw" class="btn-pw-action" title="Show / Hide Password">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                      </svg>
+                    </button>
+                    <button type="button" id="btnCopyInfoPw" class="btn-pw-action" title="Copy Password">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                        <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Subscription Tier Row -->
+              <div class="info-field-row">
+                <span class="info-field-label">Subscription Tier</span>
+                <span id="infoDisplaySubName" class="info-badge-val gold">VIP Premium Unlimited</span>
+              </div>
+            </div>
+
+            <!-- Card 2: Hardware Lock & Security -->
+            <div class="user-info-card">
+              <div class="user-card-header">
+                <div class="user-card-icon">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                    <path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="user-card-title">Bound Hardware (HWID)</h3>
+                  <p class="user-card-desc">Machine fingerprint bound to your KeyAuth account</p>
+                </div>
+              </div>
+
+              <!-- HWID Row -->
+              <div class="info-field-row vertical">
+                <div class="hwid-label-bar">
+                  <span class="info-field-label">Bound Device Fingerprint</span>
+                  <button id="btnCopyInfoHwid" class="btn-copy-chip" title="Copy HWID">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                    </svg>
+                    <span>Copy HWID</span>
+                  </button>
+                </div>
+                <div id="infoDisplayHwid" class="info-code-box">Generating...</div>
+              </div>
+
+              <div class="info-field-row">
+                <span class="info-field-label">HWID Status</span>
+                <span class="info-badge-val green">🔒 Machine Bound & Active</span>
+              </div>
+
+              <div class="info-card-actions">
+                <button type="button" id="btnResetHwidFromInfo" class="btn-outline-danger">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                    <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                  </svg>
+                  <span>Reset Local HWID Fingerprint</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Card 3: VIP Benefits & Privileges -->
+            <div class="user-info-card">
+              <div class="user-card-header">
+                <div class="user-card-icon">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="user-card-title">VIP Privileges</h3>
+                  <p class="user-card-desc">Active features included with your license</p>
+                </div>
+              </div>
+
+              <div class="privilege-list">
+                <div class="privilege-item">
+                  <span class="privilege-check">✓</span>
+                  <span><strong>Unlimited Downloads:</strong> No 5-media cap restriction</span>
+                </div>
+                <div class="privilege-item">
+                  <span class="privilege-check">✓</span>
+                  <span><strong>Ultra-HD Resolutions:</strong> 4K, 1080p 60FPS video unlocked</span>
+                </div>
+                <div class="privilege-item">
+                  <span class="privilege-check">✓</span>
+                  <span><strong>Studio Audio:</strong> 320 kbps high-bitrate MP3 extraction</span>
+                </div>
+                <div class="privilege-item">
+                  <span class="privilege-check">✓</span>
+                  <span><strong>VIP Tweaks:</strong> PC Optimization, Network & Pro Utilities</span>
+                </div>
+                <div class="privilege-item">
+                  <span class="privilege-check">✓</span>
+                  <span><strong>Zero Ad-walls & Zero Watermarks</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 4: Support & Account Actions -->
+            <div class="user-info-card">
+              <div class="user-card-header">
+                <div class="user-card-icon">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                    <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="user-card-title">VIP Support & Management</h3>
+                  <p class="user-card-desc">Direct WhatsApp operator support & actions</p>
+                </div>
+              </div>
+
+              <div class="user-support-box">
+                <p class="support-text">
+                  Need to extend your plan, reset your KeyAuth HWID on server, or need technical assistance?
+                </p>
+                <a
+                  href="https://wa.me/94724074632?text=Hello%20VEROX%20Support%2C%20I%20am%20a%20VIP%20Premium%20member%20and%20need%20assistance."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn-whatsapp-support"
+                >
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                    <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19.01L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.81 13.47 3.81 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/>
+                  </svg>
+                  <span>Chat on WhatsApp (+94724074632)</span>
+                </a>
+
+                <div class="logout-action-row">
+                  <button type="button" id="btnLogoutFromInfo" class="btn-logout-full">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                      <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                    </svg>
+                    <span>Log Out from this Device</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ==================== UPGRADE POPUP MODAL ==================== -->
+  <div id="upgradeModal" class="modal-overlay">
+    <div class="upgrade-modal-content">
+      <div class="upgrade-badge-icon">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+          <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+        </svg>
+      </div>
+
+      <h3 id="upgradeModalTitle" class="upgrade-title">
+        Upgrade to <span>Premium</span>
+      </h3>
+      <p id="upgradeModalDesc" class="upgrade-desc">
+        High Quality is a VIP exclusive feature. Free users are limited to 360p video and 128kbps audio.
+      </p>
+
+      <div class="upgrade-features-pill-row">
+        <span class="upgrade-pill">⚡ 4K 60FPS Video</span>
+        <span class="upgrade-pill">🎵 320kbps MP3</span>
+        <span class="upgrade-pill">🚫 No Watermarks</span>
+        <span class="upgrade-pill">🚀 Unlimited Downloads</span>
+      </div>
+
+      <div class="upgrade-actions-row">
+        <button id="btnModalUpgradeNow" class="btn-modal-upgrade-now">
+          👑 View Premium Plans (From 1,000)
+        </button>
+        <button id="btnModalLoginNow" class="nav-btn" style="justify-content: center; padding: 12px; font-size: 0.9rem;">
+          🔑 Login with KeyAuth Account
+        </button>
+        <button id="upgradeModalClose" class="btn-modal-close-free">
+          Continue on Free Tier
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== GAMING & DIGITAL CUSTOM CURSOR ==================== -->
+  <div id="gamingCursor" class="gaming-cursor-wrapper" aria-hidden="true">
+    <!-- Immediate Sharp Gaming Pointer -->
+    <div id="cursorPointer" class="cursor-pointer">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+        <polygon points="3,3 21,11 13,13 11,21" fill="#e50914" stroke="#ffffff" stroke-width="1.2" stroke-linejoin="round" />
+        <circle cx="13" cy="13" r="1.5" fill="#ffffff" />
+      </svg>
+    </div>
+    <!-- Digital Holographic Aura / Spring Trail -->
+    <div id="cursorAura" class="cursor-aura">
+      <div class="aura-reticle-pip pip-top"></div>
+      <div class="aura-reticle-pip pip-bottom"></div>
+      <div class="aura-reticle-pip pip-left"></div>
+      <div class="aura-reticle-pip pip-right"></div>
+    </div>
+    <!-- Click Shockwave Ring -->
+    <div id="cursorRipple" class="cursor-ripple"></div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Application Logic (v5.1 Full-Screen, VIP Fixes, Gaming Cursor) -->
+  <script src="app.js?v=5.1"></script>
+</body>
+</html>
